@@ -112,10 +112,31 @@
         return nil;
     }
     
+    /* ----------------------------------------
+     * Inform the delegate that deserialization
+     * will commence shortly.
+     */
+    if ([_delegate respondsToSelector:@selector(deserializationContextWillBeginDeserializing:)]) {
+        [_delegate deserializationContextWillBeginDeserializing:self];
+    }
+    
+    /* ----------------------------------------
+     * Run through all top level objects and
+     * recursively deserialize their children.
+     */
     NSMutableSet *topLevelObjects = [NSMutableSet new];
     for (NSString *reference in _topReferences) {
+        
         NSManagedObject *deserializedObject = [self deserializedValueForObject:reference valueClass:CDClassManagedObject];
         [topLevelObjects addObject:deserializedObject];
+    }
+    
+    /* ----------------------------------------
+     * Inform the delegate that deserialization
+     * has finished.
+     */
+    if ([_delegate respondsToSelector:@selector(deserializationContextDidFinishDeserializing:)]) {
+        [_delegate deserializationContextDidFinishDeserializing:self];
     }
     
     if (topLevelObjects.count > 0) {

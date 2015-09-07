@@ -32,6 +32,8 @@
 
 @interface CDSerializationContext : NSObject
 
+@property (weak, nonatomic) id<CDSerializationContextDelegate> delegate;
+
 + (instancetype)context;
 
 - (void)addManagedObject:(NSManagedObject *)object;
@@ -43,5 +45,13 @@
 - (NSDictionary *)serialize;
 - (NSData *)serializedJSON:(NSJSONWritingOptions)options error:(NSError **)error;
 - (NSData *)serializedPropertyList:(NSPropertyListFormat)format error:(NSError **)error;
+
+@end
+
+@protocol CDSerializationContextDelegate <NSObject>
+@optional
+
+- (void)serializationContextWillBeginSerializing:(CDSerializationContext *)context;
+- (void)serializationContextDidFinishSerializing:(CDSerializationContext *)context;
 
 @end

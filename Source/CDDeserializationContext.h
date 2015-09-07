@@ -32,6 +32,8 @@
 
 @interface CDDeserializationContext : NSObject
 
+@property (weak, nonatomic) id<CDDeserializationContextDelegate> delegate;
+
 + (instancetype)contextWithManagedObjectContext:(NSManagedObjectContext *)context;
 - (instancetype)initWithManagedObjectContext:(NSManagedObjectContext *)context;
 
@@ -40,5 +42,13 @@
 - (void)setSerializedContentsWithPropertyList:(NSData *)plistData error:(NSError **)error;
 
 - (NSSet *)deserialize;
+
+@end
+
+@protocol CDDeserializationContextDelegate <NSObject>
+@optional
+
+- (void)deserializationContextWillBeginDeserializing:(CDDeserializationContext *)context;
+- (void)deserializationContextDidFinishDeserializing:(CDDeserializationContext *)context;
 
 @end

@@ -96,6 +96,14 @@
     }
     
     /* ----------------------------------------
+     * Inform the delegate that serialization
+     * will commence shortly.
+     */
+    if ([_delegate respondsToSelector:@selector(serializationContextWillBeginSerializing:)]) {
+        [_delegate serializationContextWillBeginSerializing:self];
+    }
+    
+    /* ----------------------------------------
      * Run through all the added object, those
      * will become the top level objects. All
      * referenced children will be serialized
@@ -108,6 +116,14 @@
         if (value) {
             [topLevelReferences addObject:value];
         }
+    }
+    
+    /* ----------------------------------------
+     * Inform the delegate that serialization
+     * has finished.
+     */
+    if ([_delegate respondsToSelector:@selector(serializationContextDidFinishSerializing:)]) {
+        [_delegate serializationContextDidFinishSerializing:self];
     }
     
     /* ----------------------------------------
