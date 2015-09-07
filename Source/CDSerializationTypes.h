@@ -31,5 +31,4 @@
 #import <CoreData/CoreData.h>
 #import <Foundation/Foundation.h>
 
-
 @protocol CDSerializationContextDelegate, CDDeserializationContextDelegate;

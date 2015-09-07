@@ -51,8 +51,6 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        [_CDSerializationInitializer class];
-        
         _objectSet            = [NSMutableSet new];
         _serializedObjects    = [NSMutableDictionary new];
         _serializedReferences = [NSMapTable strongToStrongObjectsMapTable];
@@ -112,7 +110,7 @@
     NSMutableArray *topLevelReferences = [NSMutableArray new];
     for (NSManagedObject *object in _objectSet) {
         
-        id value = [self serializedValueForObject:object];
+        id value = [self serializedValueForObject:object type:NSObjectIDAttributeType];
         if (value) {
             [topLevelReferences addObject:value];
         }
@@ -165,31 +163,64 @@
 }
 
 #pragma mark - Serialization -
-- (id)serializedValueForObject:(id)object {
+- (id)serializedValueForObject:(id)object type:(NSAttributeType)type {
     
-    if ([object isKindOfClass:CDClassManagedObject]) {
-        return [self serializedReferenceForManagedObject:object];
-        
-    } else if ([object isKindOfClass:CDClassString] || [object isKindOfClass:CDClassNumber]) {
-        return object;
-        
-    } else if ([object isKindOfClass:CDClassDate]) {
-        return @([(NSDate *)object timeIntervalSince1970]);
-        
-    } else if ([object isKindOfClass:CDClassData]) {
-        return [(NSData *)object base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
-        
-    } else {
-        return nil;
+    switch (type) {
+        case NSObjectIDAttributeType: {
+            return [self serializedReferenceForManagedObject:object];
+        } break;
+            
+        case NSInteger16AttributeType:
+        case NSInteger32AttributeType:
+        case NSInteger64AttributeType:
+        case NSDecimalAttributeType:
+        case NSDoubleAttributeType:
+        case NSFloatAttributeType:
+        case NSBooleanAttributeType:
+        case NSStringAttributeType: {
+            
+            /* -----------------------------------------
+             * Strings and numbers can always be wrapped
+             * in NSString or NSNumber, therefore all of
+             * the above don't need to converted.
+             */
+            return object;
+            
+        } break;
+            
+        case NSDateAttributeType: {
+            return @([(NSDate *)object timeIntervalSince1970]);
+        } break;
+            
+        case NSBinaryDataAttributeType: {
+            return [(NSData *)object base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+        } break;
+            
+        case NSTransformableAttributeType: {
+            
+            /* ---------------------------------------------
+             * Transformable object must conform to NSCoding
+             * or NSSecureCoding, therefore we can safely
+             * archive this object to NSData and then base64
+             * it into a string.
+             */
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
+            return [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            
+        } break;
+            
+        case NSUndefinedAttributeType: {
+            return nil;
+        } break;
     }
 }
 
-- (NSArray *)serializedValueForCollection:(id<NSFastEnumeration>)collection {
+- (NSArray *)serializedValueForCollection:(id<NSFastEnumeration>)collection type:(NSAttributeType)type {
     
     NSMutableArray *container = [NSMutableArray new];
     for (id object in collection) {
         
-        id value = [self serializedValueForObject:object];
+        id value = [self serializedValueForObject:object type:type];
         if (value) {
             [container addObject:value];
         }
@@ -237,28 +268,31 @@
              * or to-one.
              */
             id deserializedValue = [object valueForKey:property];
-            id serializedValue   = nil;
-            if ([description isKindOfClass:[NSAttributeDescription class]]) {
+            if (deserializedValue) {
                 
-                serializedValue = [self serializedValueForObject:deserializedValue];
-                
-            } else if ([description isKindOfClass:[NSRelationshipDescription class]]) {
-                
-                BOOL toMany = [description isToMany];
-                if (!toMany) {
-                    serializedValue = [self serializedValueForObject:deserializedValue];
-                } else {
-                    serializedValue = [self serializedValueForCollection:deserializedValue];
+                id serializedValue = nil;
+                if ([description isKindOfClass:[NSAttributeDescription class]]) {
+                    
+                    serializedValue = [self serializedValueForObject:deserializedValue type:[description attributeType]];
+                    
+                } else if ([description isKindOfClass:[NSRelationshipDescription class]]) {
+                    
+                    BOOL toMany = [description isToMany];
+                    if (!toMany) {
+                        serializedValue = [self serializedValueForObject:deserializedValue type:NSObjectIDAttributeType];
+                    } else {
+                        serializedValue = [self serializedValueForCollection:deserializedValue type:NSObjectIDAttributeType];
+                    }
                 }
-            }
-            
-            /* ----------------------------------------
-             * Only set the value if we have it. If an
-             * attribute or relationship retuns nil, we
-             * will just ignore it.
-             */
-            if (serializedValue) {
-                properties[property] = serializedValue;
+                
+                /* ----------------------------------------
+                 * Only set the value if we have it. If an
+                 * attribute or relationship retuns nil, we
+                 * will just ignore it.
+                 */
+                if (serializedValue) {
+                    properties[property] = serializedValue;
+                }
             }
         }];
         

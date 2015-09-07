@@ -30,19 +30,7 @@
 
 #import "CDSerializationTypes.h"
 
-extern Class CDClassString;
-extern Class CDClassNumber;
-extern Class CDClassDate;
-extern Class CDClassData;
-extern Class CDClassManagedObject;
-extern Class CDClassSet;
-extern Class CDClassOrderedSet;
-extern Class CDClassNull;
-
 static NSString * const CDSerializationReferences    = @"CDSerializationReferences";
 static NSString * const CDSerializationTopReferences = @"CDSerializationTopReferences";
 static NSString * const CDObjectEntityKey            = @"CDObjectEntityKey";
 static NSString * const CDObjectPropertiesKey        = @"CDObjectPropertiesKey";
-
-@interface _CDSerializationInitializer : NSObject
-@end

@@ -52,8 +52,6 @@
 - (instancetype)initWithManagedObjectContext:(NSManagedObjectContext *)context {
     self = [super init];
     if (self) {
-        [_CDSerializationInitializer class];
-        
         _context             = context;
         _availableEntities   = [context.persistentStoreCoordinator.managedObjectModel entitiesByName];
         _deserializedObjects = [NSMutableDictionary new];
@@ -127,7 +125,7 @@
     NSMutableSet *topLevelObjects = [NSMutableSet new];
     for (NSString *reference in _topReferences) {
         
-        NSManagedObject *deserializedObject = [self deserializedValueForObject:reference valueClass:CDClassManagedObject];
+        NSManagedObject *deserializedObject = [self deserializedValueForObject:reference type:NSObjectIDAttributeType];
         [topLevelObjects addObject:deserializedObject];
     }
     
@@ -146,33 +144,59 @@
 }
 
 #pragma mark - Deserialization -
-- (id)deserializedValueForObject:(id)object valueClass:(Class)valueClass {
-
-    if ([valueClass isSubclassOfClass:CDClassManagedObject]) {
-        return [self deserializedManagedObjectForReference:object];
-        
-    } else if ([valueClass isSubclassOfClass:CDClassString] || [valueClass isSubclassOfClass:CDClassNumber]) {
-        return object;
-        
-    } else if ([valueClass isSubclassOfClass:CDClassDate]) {
-        return [NSDate dateWithTimeIntervalSince1970:[object doubleValue]];
-        
-    } else if ([valueClass isSubclassOfClass:CDClassData]) {
-        return [[NSData alloc] initWithBase64EncodedString:object options:0];
-        
-    } else {
-        return nil;
+- (id)deserializedValueForObject:(id)object type:(NSAttributeType)type {
+    
+    switch (type) {
+        case NSObjectIDAttributeType: {
+            return [self deserializedManagedObjectForReference:object];
+        } break;
+            
+        case NSInteger16AttributeType:
+        case NSInteger32AttributeType:
+        case NSInteger64AttributeType:
+        case NSDecimalAttributeType:
+        case NSDoubleAttributeType:
+        case NSFloatAttributeType:
+        case NSBooleanAttributeType:
+        case NSStringAttributeType: {
+            
+            /* -----------------------------------------
+             * Strings and numbers can always be wrapped
+             * in NSString or NSNumber, therefore all of
+             * the above don't need to converted.
+             */
+            return object;
+            
+        } break;
+            
+            
+        case NSDateAttributeType: {
+            return [NSDate dateWithTimeIntervalSince1970:[object doubleValue]];
+        } break;
+            
+        case NSBinaryDataAttributeType: {
+            return [[NSData alloc] initWithBase64EncodedString:object options:0];
+        } break;
+            
+        case NSTransformableAttributeType: {
+            NSData *data = [[NSData alloc] initWithBase64EncodedString:object options:NSDataBase64DecodingIgnoreUnknownCharacters];
+            return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        } break;
+            
+        case NSUndefinedAttributeType: {
+            return nil;
+        } break;
     }
 }
 
-- (id)deserializedValueForCollection:(id<NSFastEnumeration>)collection ordered:(BOOL)ordered valueClass:(Class)valueClass {
+- (id)deserializedValueForCollection:(id<NSFastEnumeration>)collection ordered:(BOOL)ordered type:(NSAttributeType)type {
     
     Class containerClass = (ordered) ? [NSMutableOrderedSet class] : [NSMutableSet class];
     id container         = [[containerClass alloc] init];
     
     if ([container respondsToSelector:@selector(addObject:)]) {
         for (id object in collection) {
-            [container addObject:[self deserializedValueForObject:object valueClass:valueClass]];
+            [container addObject:[self deserializedValueForObject:object type:type]];
         }
     }
     
@@ -246,16 +270,15 @@
                         id description       = propertyDescriptions[property];
                         if ([description isKindOfClass:[NSAttributeDescription class]]) {
                             
-                            Class valueClass  = NSClassFromString([description attributeValueClassName]);
-                            deserializedValue = [self deserializedValueForObject:serializedValue valueClass:valueClass];
+                            deserializedValue = [self deserializedValueForObject:serializedValue type:[description attributeType]];
                             
                         } else if ([description isKindOfClass:[NSRelationshipDescription class]]) {
                             
                             BOOL toMany = [description isToMany];
                             if (!toMany) {
-                                deserializedValue = [self deserializedValueForObject:serializedValue valueClass:CDClassManagedObject];
+                                deserializedValue = [self deserializedValueForObject:serializedValue type:NSObjectIDAttributeType];
                             } else {
-                                deserializedValue = [self deserializedValueForCollection:serializedValue ordered:[description isOrdered] valueClass:CDClassManagedObject];
+                                deserializedValue = [self deserializedValueForCollection:serializedValue ordered:[description isOrdered] type:NSObjectIDAttributeType];
                             }
                         }
                         

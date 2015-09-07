@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		9A0A35841B9DF93800A73E30 /* CDSerializationTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A0A357D1B9DF93800A73E30 /* CDSerializationTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9A0A35851B9DF93800A73E30 /* CDSerializationPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A0A357E1B9DF93800A73E30 /* CDSerializationPrivate.h */; };
-		9A0A35861B9DF93800A73E30 /* CDSerializationPrivate.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A0A357F1B9DF93800A73E30 /* CDSerializationPrivate.m */; };
 		9A0A35871B9DF93800A73E30 /* CDSerializationContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A0A35801B9DF93800A73E30 /* CDSerializationContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9A0A35881B9DF93800A73E30 /* CDSerializationContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A0A35811B9DF93800A73E30 /* CDSerializationContext.m */; };
 		9A0A35891B9DF93800A73E30 /* CDDeserializationContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A0A35821B9DF93800A73E30 /* CDDeserializationContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -21,7 +20,6 @@
 /* Begin PBXFileReference section */
 		9A0A357D1B9DF93800A73E30 /* CDSerializationTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDSerializationTypes.h; sourceTree = "<group>"; };
 		9A0A357E1B9DF93800A73E30 /* CDSerializationPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDSerializationPrivate.h; sourceTree = "<group>"; };
-		9A0A357F1B9DF93800A73E30 /* CDSerializationPrivate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDSerializationPrivate.m; sourceTree = "<group>"; };
 		9A0A35801B9DF93800A73E30 /* CDSerializationContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDSerializationContext.h; sourceTree = "<group>"; };
 		9A0A35811B9DF93800A73E30 /* CDSerializationContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDSerializationContext.m; sourceTree = "<group>"; };
 		9A0A35821B9DF93800A73E30 /* CDDeserializationContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDDeserializationContext.h; sourceTree = "<group>"; };
@@ -68,7 +66,6 @@
 				9A293B241AC1009A00080A21 /* CDSerialization.h */,
 				9A0A357D1B9DF93800A73E30 /* CDSerializationTypes.h */,
 				9A0A357E1B9DF93800A73E30 /* CDSerializationPrivate.h */,
-				9A0A357F1B9DF93800A73E30 /* CDSerializationPrivate.m */,
 				9A0A35801B9DF93800A73E30 /* CDSerializationContext.h */,
 				9A0A35811B9DF93800A73E30 /* CDSerializationContext.m */,
 				9A0A35821B9DF93800A73E30 /* CDDeserializationContext.h */,
@@ -175,7 +172,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9A0A35861B9DF93800A73E30 /* CDSerializationPrivate.m in Sources */,
 				9A0A358A1B9DF93800A73E30 /* CDDeserializationContext.m in Sources */,
 				9A0A35881B9DF93800A73E30 /* CDSerializationContext.m in Sources */,
 			);
