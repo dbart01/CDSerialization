@@ -33,7 +33,6 @@
 
 @interface CDSerializationContext ()
 
-@property (strong, nonatomic) NSManagedObjectContext *context;
 @property (strong, nonatomic) NSMutableSet *objectSet;
 
 @property (strong, nonatomic) NSMutableDictionary *serializedObjects;
@@ -153,7 +152,7 @@
     NSDictionary *contents = [self serialize];
     if (contents.count > 0) {
         
-        NSData *data = [NSPropertyListSerialization dataWithPropertyList:contents format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
+        NSData *data = [NSPropertyListSerialization dataWithPropertyList:contents format:format options:0 error:error];
         if (!data && error) {
             NSLog(@"Failed to serialize property list from managed objects: %@", (*error).localizedDescription);
         }
@@ -193,7 +192,7 @@
         } break;
             
         case NSBinaryDataAttributeType: {
-            return [(NSData *)object base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            return [(NSData *)object base64EncodedStringWithOptions:0];
         } break;
             
         case NSTransformableAttributeType: {
@@ -205,7 +204,7 @@
              * it into a string.
              */
             NSData *data = [NSKeyedArchiver archivedDataWithRootObject:object];
-            return [data base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+            return [data base64EncodedStringWithOptions:0];
             
         } break;
             
